@@ -1,0 +1,211 @@
+{
+  "name": "5-📊 Evaluation Viz",
+  "nodes": [
+    {
+      "parameters": {},
+      "id": "efd37c29-1bcd-4274-9a29-2b2dc1671516",
+      "name": "Start",
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        464,
+        176
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "// Données de test avec 30 évaluations\nreturn [\n  { json: { test_id: \"eval_001\", date: \"2024-12-01\", model: \"GPT-4-Turbo\", task_type: \"Question-Answering\", accuracy: 0.94, precision: 0.92, recall: 0.96, f1_score: 0.94, response_time_ms: 1450, cost_usd: 0.065 }},\n  { json: { test_id: \"eval_002\", date: \"2024-12-01\", model: \"GPT-4-Turbo\", task_type: \"Summarization\", accuracy: 0.89, precision: 0.87, recall: 0.91, f1_score: 0.89, response_time_ms: 2100, cost_usd: 0.095 }},\n  { json: { test_id: \"eval_003\", date: \"2024-12-02\", model: \"GPT-4-Turbo\", task_type: \"Code-Generation\", accuracy: 0.91, precision: 0.89, recall: 0.93, f1_score: 0.91, response_time_ms: 1800, cost_usd: 0.078 }},\n  { json: { test_id: \"eval_004\", date: \"2024-12-03\", model: \"GPT-4-Turbo\", task_type: \"Translation\", accuracy: 0.96, precision: 0.95, recall: 0.97, f1_score: 0.96, response_time_ms: 1350, cost_usd: 0.058 }},\n  { json: { test_id: \"eval_005\", date: \"2024-12-01\", model: \"Claude-3.5-Sonnet\", task_type: \"Question-Answering\", accuracy: 0.96, precision: 0.95, recall: 0.97, f1_score: 0.96, response_time_ms: 980, cost_usd: 0.042 }},\n  { json: { test_id: \"eval_006\", date: \"2024-12-01\", model: \"Claude-3.5-Sonnet\", task_type: \"Summarization\", accuracy: 0.93, precision: 0.91, recall: 0.95, f1_score: 0.93, response_time_ms: 1250, cost_usd: 0.053 }},\n  { json: { test_id: \"eval_007\", date: \"2024-12-02\", model: \"Claude-3.5-Sonnet\", task_type: \"Code-Generation\", accuracy: 0.95, precision: 0.94, recall: 0.96, f1_score: 0.95, response_time_ms: 1100, cost_usd: 0.048 }},\n  { json: { test_id: \"eval_008\", date: \"2024-12-03\", model: \"Claude-3.5-Sonnet\", task_type: \"Translation\", accuracy: 0.97, precision: 0.96, recall: 0.98, f1_score: 0.97, response_time_ms: 890, cost_usd: 0.039 }},\n  { json: { test_id: \"eval_009\", date: \"2024-12-04\", model: \"Claude-3.5-Sonnet\", task_type: \"Sentiment\", accuracy: 0.94, precision: 0.92, recall: 0.96, f1_score: 0.94, response_time_ms: 750, cost_usd: 0.035 }},\n  { json: { test_id: \"eval_010\", date: \"2024-12-01\", model: \"Gemini-1.5-Pro\", task_type: \"Question-Answering\", accuracy: 0.88, precision: 0.85, recall: 0.91, f1_score: 0.88, response_time_ms: 720, cost_usd: 0.028 }},\n  { json: { test_id: \"eval_011\", date: \"2024-12-01\", model: \"Gemini-1.5-Pro\", task_type: \"Summarization\", accuracy: 0.86, precision: 0.83, recall: 0.89, f1_score: 0.86, response_time_ms: 950, cost_usd: 0.035 }},\n  { json: { test_id: \"eval_012\", date: \"2024-12-02\", model: \"Gemini-1.5-Pro\", task_type: \"Code-Generation\", accuracy: 0.84, precision: 0.81, recall: 0.87, f1_score: 0.84, response_time_ms: 880, cost_usd: 0.032 }},\n  { json: { test_id: \"eval_013\", date: \"2024-12-03\", model: \"Gemini-1.5-Pro\", task_type: \"Translation\", accuracy: 0.91, precision: 0.89, recall: 0.93, f1_score: 0.91, response_time_ms: 680, cost_usd: 0.026 }},\n  { json: { test_id: \"eval_014\", date: \"2024-12-01\", model: \"Mistral-Large\", task_type: \"Question-Answering\", accuracy: 0.90, precision: 0.88, recall: 0.92, f1_score: 0.90, response_time_ms: 650, cost_usd: 0.022 }},\n  { json: { test_id: \"eval_015\", date: \"2024-12-01\", model: \"Mistral-Large\", task_type: \"Summarization\", accuracy: 0.87, precision: 0.84, recall: 0.90, f1_score: 0.87, response_time_ms: 820, cost_usd: 0.029 }},\n  { json: { test_id: \"eval_016\", date: \"2024-12-02\", model: \"Mistral-Large\", task_type: \"Code-Generation\", accuracy: 0.88, precision: 0.86, recall: 0.90, f1_score: 0.88, response_time_ms: 750, cost_usd: 0.026 }},\n  { json: { test_id: \"eval_017\", date: \"2024-12-03\", model: \"Mistral-Large\", task_type: \"Translation\", accuracy: 0.93, precision: 0.91, recall: 0.95, f1_score: 0.93, response_time_ms: 620, cost_usd: 0.020 }},\n  { json: { test_id: \"eval_018\", date: \"2024-12-01\", model: \"GPT-3.5-Turbo\", task_type: \"Question-Answering\", accuracy: 0.82, precision: 0.79, recall: 0.85, f1_score: 0.82, response_time_ms: 420, cost_usd: 0.008 }},\n  { json: { test_id: \"eval_019\", date: \"2024-12-01\", model: \"GPT-3.5-Turbo\", task_type: \"Summarization\", accuracy: 0.79, precision: 0.76, recall: 0.82, f1_score: 0.79, response_time_ms: 550, cost_usd: 0.012 }},\n  { json: { test_id: \"eval_020\", date: \"2024-12-02\", model: \"GPT-3.5-Turbo\", task_type: \"Code-Generation\", accuracy: 0.76, precision: 0.73, recall: 0.79, f1_score: 0.76, response_time_ms: 490, cost_usd: 0.010 }},\n  { json: { test_id: \"eval_021\", date: \"2024-12-03\", model: \"GPT-3.5-Turbo\", task_type: \"Translation\", accuracy: 0.85, precision: 0.83, recall: 0.87, f1_score: 0.85, response_time_ms: 380, cost_usd: 0.007 }},\n  { json: { test_id: \"eval_022\", date: \"2024-12-04\", model: \"GPT-4-Turbo\", task_type: \"Creative-Writing\", accuracy: 0.92, precision: 0.90, recall: 0.94, f1_score: 0.92, response_time_ms: 2350, cost_usd: 0.112 }},\n  { json: { test_id: \"eval_023\", date: \"2024-12-04\", model: \"Claude-3.5-Sonnet\", task_type: \"Creative-Writing\", accuracy: 0.95, precision: 0.94, recall: 0.96, f1_score: 0.95, response_time_ms: 1680, cost_usd: 0.072 }},\n  { json: { test_id: \"eval_024\", date: \"2024-12-04\", model: \"Gemini-1.5-Pro\", task_type: \"Creative-Writing\", accuracy: 0.89, precision: 0.87, recall: 0.91, f1_score: 0.89, response_time_ms: 1420, cost_usd: 0.055 }},\n  { json: { test_id: \"eval_025\", date: \"2024-12-05\", model: \"Claude-3.5-Sonnet\", task_type: \"Data-Analysis\", accuracy: 0.98, precision: 0.97, recall: 0.99, f1_score: 0.98, response_time_ms: 1150, cost_usd: 0.051 }},\n  { json: { test_id: \"eval_026\", date: \"2024-12-05\", model: \"GPT-4-Turbo\", task_type: \"Data-Analysis\", accuracy: 0.95, precision: 0.93, recall: 0.97, f1_score: 0.95, response_time_ms: 1580, cost_usd: 0.071 }},\n  { json: { test_id: \"eval_027\", date: \"2024-12-05\", model: \"Gemini-1.5-Pro\", task_type: \"Data-Analysis\", accuracy: 0.90, precision: 0.88, recall: 0.92, f1_score: 0.90, response_time_ms: 980, cost_usd: 0.038 }},\n  { json: { test_id: \"eval_028\", date: \"2024-12-06\", model: \"Claude-3.5-Sonnet\", task_type: \"Math-Reasoning\", accuracy: 0.97, precision: 0.96, recall: 0.98, f1_score: 0.97, response_time_ms: 1320, cost_usd: 0.058 }},\n  { json: { test_id: \"eval_029\", date: \"2024-12-06\", model: \"GPT-4-Turbo\", task_type: \"Math-Reasoning\", accuracy: 0.94, precision: 0.92, recall: 0.96, f1_score: 0.94, response_time_ms: 1620, cost_usd: 0.074 }},\n  { json: { test_id: \"eval_030\", date: \"2024-12-06\", model: \"Mistral-Large\", task_type: \"Math-Reasoning\", accuracy: 0.91, precision: 0.89, recall: 0.93, f1_score: 0.91, response_time_ms: 850, cost_usd: 0.031 }}\n];"
+      },
+      "id": "faeca5f8-6ccb-4c34-ab11-cd729fcb2c19",
+      "name": "Test Data (30 evals)",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        688,
+        176
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "// Aggregate data by model\nconst items = $input.all();\nconst byModel = {};\n\n// Group by model\nitems.forEach(item => {\n  const model = item.json.model;\n  if (!byModel[model]) {\n    byModel[model] = {\n      tests: [],\n      count: 0\n    };\n  }\n  byModel[model].tests.push(item.json);\n  byModel[model].count++;\n});\n\n// Calculate averages for each model\nconst results = [];\nfor (const [model, data] of Object.entries(byModel)) {\n  const tests = data.tests;\n  const count = tests.length;\n  \n  results.push({\n    model: model,\n    count: count,\n    avg_accuracy: tests.reduce((sum, t) => sum + t.accuracy, 0) / count,\n    avg_precision: tests.reduce((sum, t) => sum + t.precision, 0) / count,\n    avg_recall: tests.reduce((sum, t) => sum + t.recall, 0) / count,\n    avg_f1: tests.reduce((sum, t) => sum + t.f1_score, 0) / count,\n    avg_response_time: tests.reduce((sum, t) => sum + t.response_time_ms, 0) / count,\n    total_cost: tests.reduce((sum, t) => sum + t.cost_usd, 0)\n  });\n}\n\nreturn results.map(r => ({ json: r }));"
+      },
+      "id": "4131ecac-17b0-4dc2-bbaa-35d0c8fb09b8",
+      "name": "Aggregate by Model",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        912,
+        176
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "// Generate all charts and stats\nconst items = $input.all();\nconst models = items.map(i => i.json.model);\nconst accuracy = items.map(i => (i.json.avg_accuracy * 100).toFixed(1));\nconst precision = items.map(i => (i.json.avg_precision * 100).toFixed(1));\nconst recall = items.map(i => (i.json.avg_recall * 100).toFixed(1));\nconst f1 = items.map(i => (i.json.avg_f1 * 100).toFixed(1));\nconst times = items.map(i => Math.round(i.json.avg_response_time));\nconst costs = items.map(i => (i.json.total_cost * 100).toFixed(2));\n\nconst base = 'https://quickchart.io/chart';\n\n// Chart 1: Metrics comparison\nconst c1 = {\n  type: 'bar',\n  data: {\n    labels: models,\n    datasets: [\n      {label: 'Accuracy', data: accuracy, backgroundColor: 'rgba(54,162,235,0.8)'},\n      {label: 'Precision', data: precision, backgroundColor: 'rgba(75,192,192,0.8)'},\n      {label: 'Recall', data: recall, backgroundColor: 'rgba(255,206,86,0.8)'},\n      {label: 'F1', data: f1, backgroundColor: 'rgba(153,102,255,0.8)'}\n    ]\n  },\n  options: {\n    title: {display: true, text: '📊 Comparaison des Métriques (%)', fontSize: 18},\n    scales: {yAxes: [{ticks: {beginAtZero: true, max: 100}}]}\n  }\n};\n\nconst url1 = `${base}?w=800&h=500&bkg=white&c=${encodeURIComponent(JSON.stringify(c1))}`;\n\n// Chart 2: Performance\nconst c2 = {\n  type: 'horizontalBar',\n  data: {\n    labels: models,\n    datasets: [{\n      label: 'Temps (ms)',\n      data: times,\n      backgroundColor: ['rgba(255,99,132,0.8)','rgba(54,162,235,0.8)','rgba(255,206,86,0.8)','rgba(153,102,255,0.8)','rgba(75,192,192,0.8)']\n    }]\n  },\n  options: {\n    title: {display: true, text: '⚡ Performance - Temps de Réponse', fontSize: 18},\n    scales: {xAxes: [{ticks: {beginAtZero: true}}]}\n  }\n};\n\nconst url2 = `${base}?w=800&h=400&bkg=white&c=${encodeURIComponent(JSON.stringify(c2))}`;\n\n// Chart 3: Costs\nconst c3 = {\n  type: 'pie',\n  data: {\n    labels: models,\n    datasets: [{\n      data: costs,\n      backgroundColor: ['rgba(255,99,132,0.8)','rgba(54,162,235,0.8)','rgba(255,206,86,0.8)','rgba(153,102,255,0.8)','rgba(75,192,192,0.8)']\n    }]\n  },\n  options: {\n    title: {display: true, text: '💰 Répartition des Coûts', fontSize: 18}\n  }\n};\n\nconst url3 = `${base}?w=600&h=600&bkg=white&c=${encodeURIComponent(JSON.stringify(c3))}`;\n\n// Stats\nconst totalTests = items.reduce((sum, i) => sum + i.json.count, 0);\nconst totalCost = items.reduce((sum, i) => sum + i.json.total_cost, 0);\nconst best = items.sort((a,b) => b.json.avg_accuracy - a.json.avg_accuracy)[0].json.model;\n\nreturn [{\n  json: {\n    chartUrls: {metrics: url1, performance: url2, costs: url3},\n    stats: {modelsCount: models.length, totalTests: totalTests, bestModel: best, totalCost: totalCost.toFixed(3)},\n    aggregatedData: items.map(i => i.json)\n  }\n}];"
+      },
+      "id": "5b9849f9-55fd-47b0-bb86-1669c76395e7",
+      "name": "Generate Charts",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1136,
+        176
+      ]
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "html",
+              "name": "html",
+              "value": "=<!DOCTYPE html>\n<html><head><meta charset=\"UTF-8\"><title>Rapport</title><style>body{font-family:'Segoe UI',sans-serif;max-width:1200px;margin:0 auto;padding:20px;background:linear-gradient(135deg,#667eea,#764ba2);}.container{background:white;border-radius:10px;padding:30px;box-shadow:0 10px 40px rgba(0,0,0,0.2);}h1{color:#333;text-align:center;margin-bottom:10px;}.date{text-align:center;color:#666;margin-bottom:30px;}.chart-section{margin:30px 0;text-align:center;}.chart-section img{max-width:100%;height:auto;border-radius:8px;box-shadow:0 4px 6px rgba(0,0,0,0.1);margin:20px 0;}.summary{background:#f8f9fa;padding:20px;border-radius:8px;margin:20px 0;}.summary h2{color:#667eea;margin-top:0;}.stats-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:15px;margin-top:20px;}.stat-card{background:white;padding:15px;border-radius:8px;border-left:4px solid #667eea;}.stat-label{font-size:12px;color:#666;text-transform:uppercase;}.stat-value{font-size:24px;font-weight:bold;color:#333;margin-top:5px;}.data-table{width:100%;margin-top:20px;border-collapse:collapse;}.data-table th,.data-table td{padding:12px;text-align:left;border-bottom:1px solid #ddd;}.data-table th{background:#667eea;color:white;}.data-table tr:hover{background:#f5f5f5;}.footer{text-align:center;margin-top:40px;color:#666;font-size:14px;}</style></head><body><div class=\"container\"><h1>📊 Rapport d'Évaluation des Modèles IA</h1><div class=\"date\">Généré le {{ $now.toFormat('dd/MM/yyyy à HH:mm') }}</div><div class=\"summary\"><h2>📈 Résumé Exécutif</h2><div class=\"stats-grid\"><div class=\"stat-card\"><div class=\"stat-label\">Modèles testés</div><div class=\"stat-value\">{{ $json.stats.modelsCount }}</div></div><div class=\"stat-card\"><div class=\"stat-label\">Tests effectués</div><div class=\"stat-value\">{{ $json.stats.totalTests }}</div></div><div class=\"stat-card\"><div class=\"stat-label\">Meilleur modèle</div><div class=\"stat-value\">{{ $json.stats.bestModel }}</div></div><div class=\"stat-card\"><div class=\"stat-label\">Coût total</div><div class=\"stat-value\">${{ $json.stats.totalCost }}</div></div></div></div><div class=\"chart-section\"><h2>📊 Comparaison des Métriques</h2><img src=\"{{ $json.chartUrls.metrics }}\" alt=\"Métriques\"></div><div class=\"chart-section\"><h2>⚡ Performance</h2><img src=\"{{ $json.chartUrls.performance }}\" alt=\"Performance\"></div><div class=\"chart-section\"><h2>💰 Analyse des Coûts</h2><img src=\"{{ $json.chartUrls.costs }}\" alt=\"Coûts\"></div><div class=\"summary\"><h2>📋 Détails par Modèle</h2><table class=\"data-table\"><thead><tr><th>Modèle</th><th>Tests</th><th>Accuracy</th><th>Precision</th><th>Recall</th><th>F1</th><th>Temps (ms)</th><th>Coût ($)</th></tr></thead><tbody>{{ $json.aggregatedData.map(m => `<tr><td><strong>${m.model}</strong></td><td>${m.count}</td><td>${(m.avg_accuracy*100).toFixed(1)}%</td><td>${(m.avg_precision*100).toFixed(1)}%</td><td>${(m.avg_recall*100).toFixed(1)}%</td><td>${(m.avg_f1*100).toFixed(1)}%</td><td>${Math.round(m.avg_response_time)}</td><td>$${m.total_cost.toFixed(3)}</td></tr>`).join('') }}</tbody></table></div><div class=\"footer\"><p>🤖 Généré par n8n | Codeacademy123</p></div></div></body></html>",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "cd9d4120-6f8f-463b-99b1-aece55054393",
+      "name": "Generate HTML",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        1360,
+        176
+      ]
+    },
+    {
+      "parameters": {
+        "options": {
+          "fileName": "=Rapport_{{ $now.toFormat('yyyy-MM-dd_HHmm') }}.html"
+        }
+      },
+      "id": "24172d6f-2e7b-4406-a794-b9b9eaf7f30a",
+      "name": "Convert to File",
+      "type": "n8n-nodes-base.convertToFile",
+      "typeVersion": 1.1,
+      "position": [
+        1584,
+        80
+      ]
+    },
+    {
+      "parameters": {
+        "content": "## ✅ Workflow v4 - 100% FONCTIONNEL\n\n**Corrections:**\n• Données en Code node (format correct)\n• Agrégation manuelle (pas de bug)\n• Charts générés correctement\n• HTML avec tableau complet\n\n**Résultats attendus:**\n• 5 modèles distincts\n• 30 tests au total\n• Graphiques avec vraies données\n• Tableau avec 5 lignes\n\n**Actions:**\n1. Execute Workflow\n2. Voir les graphiques ✨\n3. Download le HTML 📄",
+        "height": 388,
+        "width": 376,
+        "color": 5
+      },
+      "id": "b91d5dea-f910-459c-8408-30d7b6b2988b",
+      "name": "Note",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        480,
+        -256
+      ]
+    },
+    {
+      "parameters": {
+        "sendTo": "anneroyam@gmail.com",
+        "subject": "=`📊 Rapport d'Évaluation - {{ $now.toFormat('dd/MM/yyyy') }}`",
+        "message": "={{ $json.html }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.1,
+      "position": [
+        1584,
+        272
+      ],
+      "id": "2dfabf86-ea25-469f-b906-53ada3d99a55",
+      "name": "Send a message",
+      "webhookId": "2ad57c97-1e7c-462a-a6d7-22b309d5a715",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "kG7zWlPTIhTDAkw4",
+          "name": "Gmail account 2"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Start": {
+      "main": [
+        [
+          {
+            "node": "Test Data (30 evals)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Test Data (30 evals)": {
+      "main": [
+        [
+          {
+            "node": "Aggregate by Model",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Aggregate by Model": {
+      "main": [
+        [
+          {
+            "node": "Generate Charts",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Generate Charts": {
+      "main": [
+        [
+          {
+            "node": "Generate HTML",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Generate HTML": {
+      "main": [
+        [
+          {
+            "node": "Convert to File",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Send a message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Convert to File": {
+      "main": [
+        []
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "20c35298-caba-4c06-b493-79ea8165737b",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "d088c9bd46f440db5c2d46df616be3ae638c569ef25d5c76e243094abf9e6a31"
+  },
+  "id": "tNgent5n8cEirmir",
+  "tags": []
+}

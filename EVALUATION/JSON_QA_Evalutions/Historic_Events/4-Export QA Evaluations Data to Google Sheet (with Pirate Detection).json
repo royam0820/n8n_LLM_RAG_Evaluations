@@ -1,0 +1,467 @@
+{
+  "name": "4-Export QA Evaluations Data to Google Sheet (with Pirate Detection)",
+  "nodes": [
+    {
+      "parameters": {},
+      "id": "20816b8a-c03b-4264-9fca-67845ecd25ec",
+      "name": "When clicking 'Test workflow'",
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        704,
+        272
+      ]
+    },
+    {
+      "parameters": {
+        "content": "## Saving Output Evaluations into Google Sheets\n### Routes to different sheets based on English type",
+        "height": 80,
+        "width": 544,
+        "color": 6
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        896,
+        80
+      ],
+      "typeVersion": 1,
+      "id": "4b4d7cfd-371d-47cf-8cd4-91d2aff2391b",
+      "name": "Sticky Note"
+    },
+    {
+      "parameters": {
+        "operation": "clear",
+        "documentId": {
+          "__rl": true,
+          "value": "1RVWsvJkMuKOv_kKiq1zaqBDCWp0wDupzl5VgveLQvcQ",
+          "mode": "list",
+          "cachedResultName": "QA_Evaluations_output",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1RVWsvJkMuKOv_kKiq1zaqBDCWp0wDupzl5VgveLQvcQ/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "QA_Evaluations_output",
+          "mode": "name"
+        },
+        "keepFirstRow": true
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        1376,
+        368
+      ],
+      "id": "48338763-66da-43f1-8a12-59f04a4ff5f2",
+      "name": "Clear Standard Sheet",
+      "executeOnce": false,
+      "alwaysOutputData": false,
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "lQgLjmlDtKNGsbdh",
+          "name": "Google Sheets account 3"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "1RVWsvJkMuKOv_kKiq1zaqBDCWp0wDupzl5VgveLQvcQ",
+          "mode": "list",
+          "cachedResultName": "QA_Evaluations_output",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1RVWsvJkMuKOv_kKiq1zaqBDCWp0wDupzl5VgveLQvcQ/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "QA_Evaluations_output",
+          "mode": "name"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "question": "={{ $json.question }}",
+            "reference_answer": "={{ $json.reference_answer }}",
+            "actual_answer": "={{ $json.actual_answer }}",
+            "correctness": "={{ $json.correctness }}",
+            "createdAt": "={{ $json.createdAt }}",
+            "updatedAt": "={{ $json.updatedAt }}",
+            "row_number": "={{ $json.row_number }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "question",
+              "displayName": "question",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "reference_answer",
+              "displayName": "reference_answer",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "actual_answer",
+              "displayName": "actual_answer",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "actual_answer",
+              "displayName": "actual_answer",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "correctness",
+              "displayName": "correctness",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "row_number",
+              "displayName": "row_number",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "createdAt",
+              "displayName": "createdAt",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "updatedAt",
+              "displayName": "updatedAt",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "id": "001866e1-286a-4a6b-8998-9700a65f91e1",
+      "name": "Append to Standard Output",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        1600,
+        368
+      ],
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "ugbZBDBLOh173bWU",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "clear",
+        "documentId": {
+          "__rl": true,
+          "value": "1yrfeqDlJJ5MjsTw6hcc0YAOsUSgV0AKcEUQk-ggfup4",
+          "mode": "list",
+          "cachedResultName": "QA_Evaluations_pirate_output",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1yrfeqDlJJ5MjsTw6hcc0YAOsUSgV0AKcEUQk-ggfup4/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "QA_Evaluations_output",
+          "mode": "name"
+        },
+        "keepFirstRow": true
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        1376,
+        176
+      ],
+      "id": "f31fb53e-e1f5-462e-ae88-8bbb04a6ab7f",
+      "name": "Clear Pirate Sheet",
+      "executeOnce": false,
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "lQgLjmlDtKNGsbdh",
+          "name": "Google Sheets account 3"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "1yrfeqDlJJ5MjsTw6hcc0YAOsUSgV0AKcEUQk-ggfup4",
+          "mode": "id"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "QA_Evaluations_output",
+          "mode": "name"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "question": "={{ $json.question }}",
+            "reference_answer": "={{ $json.reference_answer }}",
+            "actual_answer": "={{ $json.actual_answer }}",
+            "correctness": "={{ $json.correctness }}",
+            "row_number": "={{ $json.row_number }}",
+            "createdAt": "={{ $json.createdAt }}",
+            "updatedAt": "={{ $json.updatedAt }}"
+          },
+          "matchingColumns": [
+            "id"
+          ],
+          "schema": [
+            {
+              "id": "question",
+              "displayName": "question",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "reference_answer",
+              "displayName": "reference_answer",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "actual_answer",
+              "displayName": "actual_answer",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "correctness",
+              "displayName": "correctness",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "row_number",
+              "displayName": "row_number",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "createdAt",
+              "displayName": "createdAt",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "updatedAt",
+              "displayName": "updatedAt",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": true
+        },
+        "options": {}
+      },
+      "id": "e6048c57-446a-4f38-bf51-f080deecf9f4",
+      "name": "Append to Pirate Output",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        1600,
+        176
+      ],
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "ugbZBDBLOh173bWU",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "get",
+        "dataTableId": {
+          "__rl": true,
+          "value": "E8tlPjndUhKm1rDF",
+          "mode": "list",
+          "cachedResultName": "QA_Evaluations",
+          "cachedResultUrl": "/projects/6Fjmkjt2Wl8Zimhv/datatables/E8tlPjndUhKm1rDF"
+        }
+      },
+      "type": "n8n-nodes-base.dataTable",
+      "typeVersion": 1,
+      "position": [
+        928,
+        272
+      ],
+      "id": "7be7f541-b991-4cb2-a5f1-67cd3b306976",
+      "name": "Get row(s)"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "id-1",
+              "leftValue": "={{ $json.actual_answer }}",
+              "rightValue": "/(arr|ahoy|matey|\\bye\\b|aye|shiver|timbers)/i",
+              "operator": {
+                "type": "string",
+                "operation": "regex"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "7b76c16c-4f6e-4015-b782-9841affe59ab",
+      "name": "Check if Pirate English",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        1152,
+        272
+      ]
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "When clicking 'Test workflow'": {
+      "main": [
+        [
+          {
+            "node": "Get row(s)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Clear Standard Sheet": {
+      "main": [
+        [
+          {
+            "node": "Append to Standard Output",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Clear Pirate Sheet": {
+      "main": [
+        [
+          {
+            "node": "Append to Pirate Output",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get row(s)": {
+      "main": [
+        [
+          {
+            "node": "Check if Pirate English",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Check if Pirate English": {
+      "main": [
+        [
+          {
+            "node": "Clear Pirate Sheet",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Clear Standard Sheet",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "82b0e890-9d53-49e6-89ae-a942fbc70508",
+  "meta": {
+    "instanceId": "d088c9bd46f440db5c2d46df616be3ae638c569ef25d5c76e243094abf9e6a31"
+  },
+  "id": "3Wfz9om2bXp4XMGO",
+  "tags": []
+}

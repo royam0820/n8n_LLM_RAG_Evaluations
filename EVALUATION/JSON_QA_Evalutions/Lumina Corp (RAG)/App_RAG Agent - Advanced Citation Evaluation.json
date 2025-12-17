@@ -1,0 +1,685 @@
+{
+  "name": "App_RAG Agent - Advanced Citation Evaluation",
+  "nodes": [
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "612266b5-c5c0-4091-875e-50cd729cda11",
+              "name": "Search Store",
+              "type": "string",
+              "value": "fileSearchStores/geminiragdemo-quv2fndtdbor"
+            },
+            {
+              "id": "id-2",
+              "name": "sessionId",
+              "type": "string",
+              "value": "={{ $json.body.sessionId || $json.sessionId || 'default-session' }}"
+            },
+            {
+              "id": "id-3",
+              "name": "Drive Folder URL",
+              "type": "string",
+              "value": "https://drive.google.com/drive/u/0/folders/1pDHcsAyUSr2D-WRGJvnoE-2sOPaCk3Zz"
+            }
+          ]
+        },
+        "includeOtherFields": true,
+        "options": {}
+      },
+      "id": "0940237c-9664-475e-9f95-89b1ce9fbb6a",
+      "name": "Get Store1",
+      "type": "n8n-nodes-base.set",
+      "position": [
+        6224,
+        256
+      ],
+      "typeVersion": 3.4
+    },
+    {
+      "parameters": {
+        "mode": "combine",
+        "combineBy": "combineAll",
+        "options": {}
+      },
+      "id": "c5a3ecb9-7e02-493b-b36b-a6f0be6810b5",
+      "name": "Merge",
+      "type": "n8n-nodes-base.merge",
+      "position": [
+        6448,
+        496
+      ],
+      "typeVersion": 3.2
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ $json.question }}",
+        "options": {
+          "systemMessage": "=You are a precise assistant that answers questions using ONLY information from the knowledge base.\n\nCRITICAL RULES:\n1. Answer ONLY what is explicitly asked - nothing more, nothing less\n2. Do NOT add context, background information, or related details unless specifically requested\n3. Do NOT include compliance information, standards, regulations, or restrictions unless directly asked\n4. If asked for \"technical specifications\" - provide ONLY technical specs (voltage, capacity, connectivity, etc.)\n5. If asked for \"features\" - provide ONLY features\n6. If asked for \"compliance\" - provide ONLY compliance information\n7. Keep answers minimal and directly relevant to the exact question\n8. If the question cannot be answered with available information, say so clearly\n\nCitation format:\n1. Use the SearchStore tool to find information\n2. Add inline citation numbers [1], [2] in your answer\n3. End with a \"References\" section listing only filenames\n4. Format: [number] FILENAME (e.g., \"Lumina_Sphere_User_Manual_v1.pdf\")\n\nRemember: Answer the question asked, not what you think they might want to know."
+        }
+      },
+      "id": "22c2e8f1-174e-40ce-ad50-93193263d4de",
+      "name": "Rag Agent",
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "position": [
+        6960,
+        496
+      ],
+      "typeVersion": 3
+    },
+    {
+      "parameters": {
+        "toolDescription": "Searches the Gemini file search store and returns results with grounding metadata. IMPORTANT: The response contains groundingMetadata.groundingChunks array where each chunk has web.uri or fileUri fields - these are the actual document URLs. Extract and return these URIs in your citations, NOT the fileSearchStore path. Return the full JSON response so the agent can access groundingMetadata.groundingChunks[].web.uri or groundingMetadata.groundingChunks[].retrievalMetadata.fileUri fields.",
+        "method": "POST",
+        "url": "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent\n",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpQueryAuth",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{\n{\n\"contents\": [\n{\n\"role\": \"user\",\n\"parts\": [\n{ \"text\": $fromAI('query', 'The user question to search for in the knowledge base', 'string') }\n]\n}\n],\n\"tools\": [\n{\n\"fileSearch\": {\n\"fileSearchStoreNames\": [ $(\"Get Store1\").first().json[\"Search Store\"] ]\n}\n}\n]\n}\n}}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequestTool",
+      "typeVersion": 4.3,
+      "position": [
+        7152,
+        720
+      ],
+      "id": "5ca5b207-7cba-423d-9cc2-b93647231851",
+      "name": "Search Node",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "XxXAH8i2wLbkxey8",
+          "name": "Google Gemini(PaLM) Api account"
+        },
+        "httpQueryAuth": {
+          "id": "AWZx2A3pRJvnJBqb",
+          "name": "Query Auth account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenRouter",
+      "typeVersion": 1,
+      "position": [
+        6896,
+        720
+      ],
+      "id": "1043ad5a-b98d-4c9c-8681-d32b38179f19",
+      "name": "OpenRouter Chat Model",
+      "credentials": {
+        "openRouterApi": {
+          "id": "5n0qIaIK5n5rp4i8",
+          "name": "OpenRouter account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "sessionKey": "={{ $json.sessionId || 'default-session' }}"
+      },
+      "type": "@n8n/n8n-nodes-langchain.memoryBufferWindow",
+      "typeVersion": 1.3,
+      "position": [
+        7024,
+        720
+      ],
+      "id": "a1149a7d-4227-4615-9d4a-8d5070b14699",
+      "name": "Simple Memory"
+    },
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "chat",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "id": "bb9a7925-b01e-412e-bf5b-af9cda757606",
+      "name": "Webhook Trigger",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        6000,
+        592
+      ],
+      "webhookId": "d7ed8dc0-00b5-4317-b6b7-3d6807c38477"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "id": "4e88139a-f7c4-49e4-99fc-892c7eac65e0",
+      "name": "Send Response",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.5,
+      "position": [
+        7808,
+        592
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "// Parse the agent output and extract citations\nconst agentOutput = $input.first().json.output;\n\n// Initialize the result structure\nlet answerText = agentOutput;\nconst citations = [];\n\n// Google Drive folder URL from configuration\nconst driveFolderUrl = $(\"Get Store1\").first().json[\"Drive Folder URL\"];\n\n// Extract references section if it exists\nconst referencesMatch = agentOutput.match(/References:?\\s*([\\s\\S]*?)$/i);\n\nif (referencesMatch) {\n  const referencesSection = referencesMatch[1];\n  const answerWithoutRefs = agentOutput.substring(0, referencesMatch.index).trim();\n  \n  // Parse individual references\n  // Expected format: [1] filename.pdf or [1]: filename.pdf\n  const lines = referencesSection.split(\"\\n\").filter(line => line.trim());\n  \n  for (const line of lines) {\n    // Match citation number and filename\n    const match = line.match(/\\[(\\d+)\\]:?\\s*(.+?)$/i);\n    \n    if (match) {\n      const filename = match[2].trim();\n      \n      citations.push({\n        title: filename,\n        url: driveFolderUrl\n      });\n    }\n  }\n  \n  answerText = answerWithoutRefs;\n}\n\n// Return structured output\nreturn [\n  {\n    json: {\n      answer: answerText,\n      citations: citations,\n      fullResponse: agentOutput,\n      text: agentOutput\n    }\n  }\n];"
+      },
+      "id": "1bf8dfca-25b8-47ff-af76-5c9c3f775c15",
+      "name": "Format Response with URLs",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        7360,
+        496
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "/**\n * Simple API Key Validation for n8n\n * Place this Code node right after your Webhook Trigger\n * \n * This validates a simple API key from the X-API-Key header\n */\n\n// Your API Key - CHANGE THIS to a secure random string\nconst VALID_API_KEY = '3ee0be8da48620f94c13bc0735ead8c91cc44068e4804e5324f34b55a75554dc8340a993493745a2c4f2153a482355d192b0da7d52c383028ba0d2ea09cb0603';\n\n// Get the API key from headers\nconst apiKey = $input.first().json.headers?.['x-api-key'] || \n               $input.first().json.headers?.['X-API-Key'];\n\n// Check if API key is provided\nif (!apiKey) {\n  return [{\n    json: {\n      error: 'Unauthorized',\n      message: 'API key is required. Please provide X-API-Key header.',\n      statusCode: 401\n    }\n  }];\n}\n\n// Validate the API key\nif (apiKey !== VALID_API_KEY) {\n  return [{\n    json: {\n      error: 'Unauthorized',\n      message: 'Invalid API key',\n      statusCode: 401\n    }\n  }];\n}\n\n// API key is valid - pass through the original data\nreturn [$input.first().json];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        6224,
+        736
+      ],
+      "id": "f72b9e0f-90ef-4305-8e03-f3eb23e9ee49",
+      "name": "Security Key"
+    },
+    {
+      "parameters": {
+        "dataTableId": {
+          "__rl": true,
+          "value": "U8dGX0SztiGSvxZt",
+          "mode": "list",
+          "cachedResultName": "QA_LuminaCorp",
+          "cachedResultUrl": "/projects/pPDNmEwNEq8On9DD/datatables/U8dGX0SztiGSvxZt"
+        },
+        "limitRows": true,
+        "filterRows": true,
+        "filters": {
+          "conditions": [
+            {
+              "keyValue": "10"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.evaluationTrigger",
+      "typeVersion": 4.7,
+      "position": [
+        5776,
+        336
+      ],
+      "id": "63753449-c4d6-491f-b3d8-f12d576a0d30",
+      "name": "When fetching a dataset row",
+      "executeOnce": false
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "3e57aafb-fad7-4833-8ce3-fd9631175598",
+              "name": "chatInput",
+              "value": "={{ $json.question }}",
+              "type": "string"
+            },
+            {
+              "id": "new-id-session",
+              "name": "sessionId",
+              "value": "evaluation-session",
+              "type": "string"
+            }
+          ]
+        },
+        "includeOtherFields": true,
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        6000,
+        336
+      ],
+      "id": "499a3cda-1341-4495-9d04-8d9ab8ef3bc7",
+      "name": "Prepare Evaluation Input"
+    },
+    {
+      "parameters": {
+        "operation": "checkIfEvaluating"
+      },
+      "type": "n8n-nodes-base.evaluation",
+      "typeVersion": 4.8,
+      "position": [
+        7584,
+        496
+      ],
+      "id": "e12302a1-23be-4fad-93d5-bbf78993fe81",
+      "name": "If Evaluating"
+    },
+    {
+      "parameters": {
+        "dataTableId": {
+          "__rl": true,
+          "value": "U8dGX0SztiGSvxZt",
+          "mode": "list",
+          "cachedResultName": "QA_LuminaCorp",
+          "cachedResultUrl": "/projects/pPDNmEwNEq8On9DD/datatables/U8dGX0SztiGSvxZt"
+        },
+        "outputs": {
+          "values": [
+            {
+              "outputName": "actual_answer",
+              "outputValue": "={{ $json.answer }}"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.evaluation",
+      "typeVersion": 4.8,
+      "position": [
+        7808,
+        400
+      ],
+      "id": "3f37c53b-962a-4552-81dd-3b10d1a70691",
+      "name": "Store Actual Answer"
+    },
+    {
+      "parameters": {
+        "jsCode": "/**\n * Advanced Citation Analysis v8 (Final Robust Fix)\n * - Fixes \"Unknown error\" via extreme defensive coding against null/undefined regex results.\n * - Fixes messy filenames in CSV by relaxing extension regex (removed word boundary \\b).\n * - Ensures unique filenames in output using Set.\n */\n\nconst inputItems = $input.first();\nconst inputJson = inputItems?.json || {};\n// We work solely from the raw fullResponse. Ensure it's a string.\nconst fullResponse = (inputJson.fullResponse || '').toString();\n// Ground Truth: The actual source documents provided to the LLM\nconst groundTruthSourceMetadata = inputJson.citations || []; \n\n// --- Regex Definitions ---\nconst markerRegex = /\\[\\s*(\\d+)\\s*\\]/g;\n// Simpler regex: Captures the number [1] (group 1) and everything else on the line (group 2)\nconst refLineRegex = /\\[\\s*(\\d+)\\s*\\][:\\s]*(.*)/i;\nconst sentenceSplitRegex = /[.!?]+/;\n// Regex to find the start of the references section\nconst refSectionHeaderRegex = /References[:\\s]*(\\n|$)/i;\n\n\n// --- STEP 1: Separate Answer Body from References Section ---\n\nlet answerBodyWithCitations = fullResponse; // Default if no ref section found\nlet referencedDocs = [];\n\n// Find the \"References:\" header\nconst refSectionHeaderMatch = fullResponse.match(refSectionHeaderRegex);\nconst hasReferencesSection = !!refSectionHeaderMatch;\n\nif (refSectionHeaderMatch && refSectionHeaderMatch.index !== undefined) {\n  // 1. Get the text part (everything BEFORE \"References:\")\n  answerBodyWithCitations = fullResponse.substring(0, refSectionHeaderMatch.index).trim();\n  \n  // 2. Get the references part (everything AFTER the header)\n  const startIndex = refSectionHeaderMatch.index + refSectionHeaderMatch[0].length;\n  const referencesSectionBody = fullResponse.substring(startIndex);\n  \n  // Parse the reference lines\n  // Ensure referencesSectionBody is a string before splitting\n  const lines = (referencesSectionBody || '').split('\\n').filter(line => line && line.trim().length > 0);\n  \n  lines.forEach(line => {\n    // Match [1] and the rest of the line\n    const match = line.match(refLineRegex);\n    \n    // Defensive check: ensure match successful and we have the capture groups needed\n    if (match && match.length >= 3 && match[2]) {\n      let rawFilenamePart = match[2].trim();\n\n      // CLEANUP LOGIC: Look for the first occurrence of .pdf or .txt.\n      // V8 FIX: Removed \\b word boundary check to handle cases like \".txtThe rest of the text\"\n      const extMatch = rawFilenamePart.match(/\\.(pdf|txt)/i);\n      if (extMatch && extMatch.index !== undefined) {\n          // Found an extension. Cut the string exactly after the extension ends\n          const endIndex = extMatch.index + extMatch[0].length;\n          rawFilenamePart = rawFilenamePart.substring(0, endIndex).trim();\n      }\n\n      // Only add if we have a valid length string left resulting from cleanup\n      if (rawFilenamePart.length > 0) {\n         referencedDocs.push({\n          number: parseInt(match[1], 10),\n          filenameNormalized: rawFilenamePart.toLowerCase(),\n          filenameOriginal: rawFilenamePart\n        });\n      }\n    }\n  });\n}\n\n\n// --- STEP 2: Run Analysis on the Answer Body ---\n\n// Ensure answer body is a string just in case\nconst safeAnswerBody = (answerBodyWithCitations || '').toString();\n\n// Extract citation markers from the body text\nconst markerMatches = [...safeAnswerBody.matchAll(markerRegex)];\nconst citationMarkersRaw = markerMatches.map(m => m[0]);\n// Use Set to count unique numbers used in the text body\nconst uniqueCitationNumbers = [...new Set(markerMatches.map(m => parseInt(m[1], 10)))];\n\n// Calculate Word Count & Density\nconst wordCount = safeAnswerBody.split(/\\s+/).filter(w => w.length > 0).length;\nconst citationDensity = wordCount > 0 ? (citationMarkersRaw.length / wordCount) * 100 : 0;\n\n// Calculate Sentence Coverage & Risk Flags\nconst sentences = safeAnswerBody.split(sentenceSplitRegex).filter(s => s.trim().length > 0);\nlet sentencesWithCitations = 0;\nconst unsupportedStrongClaims = [];\nconst absoluteTerms = ['always', 'never', 'all', 'none', 'every', 'best', 'worst', 'most', 'least', 'guaranteed', 'certainly', 'definitely', 'undoubtedly', 'proven', 'fact'];\n\nsentences.forEach((sentence, idx) => {\n  // Check if sentence contains citation marker like [1]\n  const hasCitation = /\\[\\s*\\d+\\s*\\]/.test(sentence);\n  if (hasCitation) sentencesWithCitations++;\n  \n  const lowerSentence = sentence.toLowerCase();\n  absoluteTerms.forEach(term => {\n    // Match whole words only\n    const wholeWordRegex = new RegExp(`\\\\b${term}\\\\b`, 'i');\n    if (wholeWordRegex.test(lowerSentence) && !hasCitation) {\n      unsupportedStrongClaims.push({\n        sentence_index: idx + 1,\n        risk_term: term,\n        snippet: sentence.trim().substring(0, 60) + (sentence.length > 60 ? '...' : '')\n      });\n    }\n  });\n});\n\nconst citationCoveragePct = sentences.length > 0 ? (sentencesWithCitations / sentences.length) * 100 : 0;\n\n\n// --- STEP 3: Consistency Checks ---\n\n// Internal Consistency: Do markers in text exist in the reference list?\nconst markersWithMissingRef = uniqueCitationNumbers.filter(num => \n  !referencedDocs.some(doc => doc.number === num)\n);\n// Calculate percentage, handling edge case where there are no citations at all\nconst internalConsistencyPct = uniqueCitationNumbers.length > 0 \n    ? ((uniqueCitationNumbers.length - markersWithMissingRef.length) / uniqueCitationNumbers.length) * 100 \n    : (referencedDocs.length > 0 ? 0 : 100);\n\n// External Accuracy (Ground Truth Check): Do generated references exist in input metadata?\n// Ensure input metadata items have filename properties before accessing\nconst validSourceFilenames = new Set(groundTruthSourceMetadata.map(s => (s.title || s.filename || '').toString().trim().toLowerCase()));\nconst hallucinatedReferences = referencedDocs.filter(doc => \n    !validSourceFilenames.has(doc.filenameNormalized)\n);\nconst externalAccuracyPct = referencedDocs.length > 0\n    ? ((referencedDocs.length - hallucinatedReferences.length) / referencedDocs.length) * 100\n    : 100;\n\n\n// --- STEP 4: Scoring Algorithm (0-100) ---\n\nlet objectiveScore = 0;\n\n// 1. Basic Presence (Max 20)\n// Is there at least one [x] marker in the text body?\nif (citationMarkersRaw.length > 0) objectiveScore += 10;\n// Is there a \"References:\" section at the end with items in it?\nif (hasReferencesSection && referencedDocs.length > 0) objectiveScore += 10;\n\n// 2. Internal Consistency (Max 25)\n// Do the markers in the text match the list at the end?\nobjectiveScore += (internalConsistencyPct * 0.25);\n\n// 3. External Accuracy / Ground Truth (Max 25)\n// Do the generated references actually exist in your source files?\nobjectiveScore += (externalAccuracyPct * 0.25);\n\n// 4. Coverage Density (Max 20) - ### CHANGED SECTION ###\n// OLD HARSH RULES (Removed):\n// if (citationCoveragePct >= 60) objectiveScore += 20;\n// else if (citationCoveragePct >= 30) objectiveScore += 10;\n// else if (citationCoveragePct > 0) objectiveScore += 5;\n\n// NEW RELAXED RULE:\n// If there is at least one cited sentence in the answer body, give full points for density.\n// We assume one citation at the end of a paragraph covers the whole paragraph.\nif (citationCoveragePct > 0 && sentences.length > 0) {\n    objectiveScore += 20;\n}\n// ####################################################\n\n\n// 5. Risk Flags (Max 10)\n// Did the agent use risky words like \"always\" or \"guaranteed\" without a citation?\nif (unsupportedStrongClaims.length === 0) objectiveScore += 10;\nelse if (unsupportedStrongClaims.length <= 2) objectiveScore += 5;\n\n// Final Calculation\nobjectiveScore = Math.round(objectiveScore);\n// Cap the score at 100 just in case of rounding weirdness\nif (objectiveScore > 100) objectiveScore = 100;\n\nconst grade = objectiveScore >= 90 ? 'A' : objectiveScore >= 80 ? 'B' : objectiveScore >= 70 ? 'C' : objectiveScore >= 60 ? 'D' : 'F';\n\n\n// --- Final Output ---\n// V8 FIX: Use Set here to ensure final list has no duplicates\nconst uniqueFilenamesFlat = [...new Set(referencedDocs.map(d => d.filenameOriginal))];\n\nreturn [{\n  json: {\n    ...inputJson,\n    citation_analysis: {\n      summary: { score: objectiveScore, grade: grade, status: objectiveScore > 75 ? \"Passing\" : \"Needs Improvement\" },\n      referenced_filenames_flat: uniqueFilenamesFlat,\n      metrics: {\n          citation_count: citationMarkersRaw.length,\n          unique_citations_used: uniqueCitationNumbers.length,\n          generated_references_count: referencedDocs.length,\n          // Guard against NaN if wordcount is 0\n          citation_density: isNaN(citationDensity) ? 0 : parseFloat(citationDensity.toFixed(2)),\n          citation_sentence_coverage_pct: isNaN(citationCoveragePct) ? 0 : parseFloat(citationCoveragePct.toFixed(2)),\n      },\n      validation: {\n          has_references_section: hasReferencesSection,\n          internal_consistency_pct: isNaN(internalConsistencyPct) ? 0 : parseFloat(internalConsistencyPct.toFixed(1)),\n          markers_missing_from_ref_list: markersWithMissingRef,\n          external_accuracy_pct: isNaN(externalAccuracyPct) ? 0 : parseFloat(externalAccuracyPct.toFixed(1)),\n          hallucinated_source_names: hallucinatedReferences.map(d => d.filenameOriginal),\n      },\n      risk_indicators: {\n          count: unsupportedStrongClaims.length,\n          unsupported_strong_claims: unsupportedStrongClaims\n      }\n    }\n  }\n}];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        8032,
+        400
+      ],
+      "id": "ef2e6946-d60b-4460-a49b-184c49e9f134",
+      "name": "Analyze Citations"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "id-1",
+              "name": "question",
+              "value": "={{ $json.chatInput || $json.body.message }}",
+              "type": "string"
+            }
+          ]
+        },
+        "includeOtherFields": true,
+        "options": {}
+      },
+      "id": "a2bfd620-74ee-4c56-9c14-d05ad0a7ea28",
+      "name": "Route Question",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        6672,
+        496
+      ]
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1,
+      "position": [
+        8336,
+        624
+      ],
+      "id": "60f71184-4c11-460c-b57e-371c2fe2a426",
+      "name": "Google Gemini Chat Model",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "XxXAH8i2wLbkxey8",
+          "name": "Google Gemini(PaLM) Api account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "setMetrics",
+        "expectedAnswer": "={{ $('Route Question').item.json.reference_answer }}",
+        "actualAnswer": "={{ $('If Evaluating').item.json.answer }}",
+        "prompt": "=You are an expert factual evaluator assessing the accuracy of answers compared to established ground truths.\n\nEvaluate the factual correctness of a given output compared to the provided ground truth on a scale from 1 to 5. Use detailed reasoning to thoroughly analyze all claims before determining the final score.\n\n# Scoring Criteria\n\n- 5: Highly similar - The output and ground truth are factually identical. Phrasing may differ, but all key facts, numbers, and entities are present and correct.\n- 4: Somewhat similar - The output is largely correct but may miss a minor detail or contain a very slight, insignificant inaccuracy that does not change the core meaning.\n- 3: Moderately similar - The core essence is captured, but there are evident missing important details or noticeable inaccuracies in specifics (e.g., slightly off dates or numbers).\n- 2: Slightly similar - The output captures only a few elements of the ground truth and contains significant factual errors (hallucinations) or misses the majority of critical information.\n- 1: Not similar - The output is significantly different from the ground truth, factually incorrect on major points, or completely fails to address the prompt.\n\n# Evaluation Steps\n\n1. Identify and list the specific factual claims, entities (names, dates, numbers), and relationships present in both the output and the ground truth.\n2. Compare these key elements side-by-side.\n3. Analyze semantic meaning: Does the output convey the same message as the ground truth, even if worded differently?\n4. Verify factual accuracy: Scrutinize specific details. A wrong date or name is a major error.\n5. Weigh Omission vs. Commission: Assess whether the output is missing information (omission) or adding incorrect information (hallucination/commission).\n6. Determine the overall score based on the defined criteria.\n\n# Output Format\n\nProvide:\n- A detailed analysis of the comparison (extended reasoning)\n- A one-sentence summary highlighting key differences (not similarities)\n- The final similarity score as an integer (1, 2, 3, 4, or 5)\n\nAlways follow the JSON format below and return nothing else:\n{\n  \"extended_reasoning\": \"<detailed step-by-step analysis of factual accuracy and similarity>\",\n  \"reasoning_summary\": \"<one sentence summary focusing on key differences>\",\n  \"score\": <number: integer from 1 to 5>\n}\n\n# Examples\n\n**Example 1: Significant Factual Error (Hallucination)**\n\nInput:\n- Output: \"The company was founded in 2021 by CEO Jane Doe.\"\n- Ground Truth: \"The company was originally established in 2020 by founder John Smith.\"\n\nExpected Output:\n{\n  \"extended_reasoning\": \"I am comparing the output's claims regarding founding year and founder name against the ground truth. The output states the year is '2021' and the founder is 'Jane Doe'. The ground truth states the year is '2020' and the founder is 'John Smith'. While the sentence structure is similar, both specific data points in the output are factually incorrect. These are significant errors regarding core entities.\",\n  \"reasoning_summary\": \"The output contains incorrect factual details for both the founding year (2021 vs 2020) and the founder's name (Jane Doe vs John Smith).\",\n  \"score\": 2\n}\n\n**Example 2: Omission of Critical Detail**\n\nInput:\n- Output: \"To reset the gateway, press and hold the red button for 10 seconds.\"\n- Ground Truth: \"To reset the gateway, first ensure the power cable is disconnected, then press and hold the red button for 10 seconds.\"\n\nExpected Output:\n{\n  \"extended_reasoning\": \"Comparing the procedural instructions. Both agree on the action of pressing the red button for 10 seconds. However, the ground truth includes a critical prerequisite step: 'ensure the power cable is disconnected'. The output omits this crucial safety step entirely. While what is present is correct, the omission makes the instruction incomplete and potentially inaccurate in practice.\",\n  \"reasoning_summary\": \"The output omits the critical prerequisite step of disconnecting the power cable before pressing the reset button.\",\n  \"score\": 3\n}\n\n**Example 3: High Similarity with Phrasing Differences**\n\nInput:\n- Output: \"Q4 revenue hit $1.5M, a 20% jump over the previous year.\"\n- Ground Truth: \"The company reported $1.5 million in revenue for the fourth quarter, marking a 20% YoY growth.\"\n\nExpected Output:\n{\n  \"extended_reasoning\": \"Analyzing the key metrics. Output mentions 'Q4 revenue', '$1.5M', and '20% jump... previous year'. Ground truth mentions 'fourth quarter... revenue', '$1.5 million', and '20% YoY growth'. The numerical values ($1.5M and 20%) are identical. The time periods (Q4 vs fourth quarter, previous year vs YoY) are semantically identical. The phrasing differs, but the factual content is perfectly preserved with zero errors or omissions.\",\n  \"reasoning_summary\": \"No significant factual differences; the phrasing differs but conveys identical data.\",\n  \"score\": 5\n}\n\n# Notes\n\n- Focus primarily on factual accuracy and semantic similarity, not writing style.\n- Pay close attention to dates, numbers, proper names, and causal relationships. These are often high-stakes data points.\n- **Critical Guideline:** Penalize the inclusion of incorrect information (hallucinations) more severely than the omission of details. An answer that is factually correct but slightly incomplete (e.g., Score 3 or 4) is usually preferable to an answer that contains fabricated claims (e.g., Score 2 or 1).",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.evaluation",
+      "typeVersion": 4.8,
+      "position": [
+        8256,
+        400
+      ],
+      "id": "3082e9d7-b60b-4558-9d44-d20980fd7184",
+      "name": "Correctness"
+    },
+    {
+      "parameters": {
+        "operation": "setMetrics",
+        "metric": "customMetrics",
+        "metrics": {
+          "assignments": [
+            {
+              "name": "Truthfullness",
+              "value": "={{ $('Analyze Citations').item.json.citation_analysis.summary.score }}",
+              "type": "number",
+              "id": "bdcc5fda-c45b-4e9e-9458-4d60e2cb74da"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.evaluation",
+      "typeVersion": 4.8,
+      "position": [
+        8608,
+        400
+      ],
+      "id": "341fb865-24e5-4045-b1da-66386bdec45a",
+      "name": "Truthfullness"
+    },
+    {
+      "parameters": {
+        "dataTableId": {
+          "__rl": true,
+          "mode": "list",
+          "value": "U8dGX0SztiGSvxZt"
+        },
+        "outputs": {
+          "values": [
+            {
+              "outputName": "Citations",
+              "outputValue": "={{ $('Analyze Citations').item.json.citation_analysis.referenced_filenames_flat.join('; ') }}"
+            }
+          ]
+        }
+      },
+      "id": "fa2e2676-9eca-420f-a28d-51226e79404c",
+      "name": "Store Citations",
+      "type": "n8n-nodes-base.evaluation",
+      "typeVersion": 4.8,
+      "position": [
+        8832,
+        400
+      ]
+    },
+    {
+      "parameters": {
+        "dataTableId": {
+          "__rl": true,
+          "mode": "list",
+          "value": "U8dGX0SztiGSvxZt",
+          "cachedResultName": "QA_LuminaCorp",
+          "cachedResultUrl": "/projects/pPDNmEwNEq8On9DD/datatables/U8dGX0SztiGSvxZt"
+        },
+        "outputs": {
+          "values": [
+            {
+              "outputName": "Correctness",
+              "outputValue": "={{ $('Correctness').item.json.Correctness }}"
+            }
+          ]
+        }
+      },
+      "id": "dc632ee3-e680-4d44-a0c7-112bd92bdb6c",
+      "name": "Store Correctness",
+      "type": "n8n-nodes-base.evaluation",
+      "typeVersion": 4.8,
+      "position": [
+        9056,
+        400
+      ]
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Get Store1": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenRouter Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Rag Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Simple Memory": {
+      "ai_memory": [
+        [
+          {
+            "node": "Rag Agent",
+            "type": "ai_memory",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Search Node": {
+      "ai_tool": [
+        [
+          {
+            "node": "Rag Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Webhook Trigger": {
+      "main": [
+        [
+          {
+            "node": "Get Store1",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 1
+          },
+          {
+            "node": "Security Key",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Rag Agent": {
+      "main": [
+        [
+          {
+            "node": "Format Response with URLs",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Format Response with URLs": {
+      "main": [
+        [
+          {
+            "node": "If Evaluating",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Security Key": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "When fetching a dataset row": {
+      "main": [
+        [
+          {
+            "node": "Prepare Evaluation Input",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Prepare Evaluation Input": {
+      "main": [
+        [
+          {
+            "node": "Get Store1",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "If Evaluating": {
+      "main": [
+        [
+          {
+            "node": "Store Actual Answer",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Send Response",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Merge": {
+      "main": [
+        [
+          {
+            "node": "Route Question",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Route Question": {
+      "main": [
+        [
+          {
+            "node": "Rag Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Store Actual Answer": {
+      "main": [
+        [
+          {
+            "node": "Analyze Citations",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Analyze Citations": {
+      "main": [
+        [
+          {
+            "node": "Correctness",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Gemini Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Correctness",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Truthfullness": {
+      "main": [
+        [
+          {
+            "node": "Store Citations",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Correctness": {
+      "main": [
+        [
+          {
+            "node": "Truthfullness",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Store Citations": {
+      "main": [
+        [
+          {
+            "node": "Store Correctness",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "9685e881-babb-4dfe-920c-479cebe26325",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "d088c9bd46f440db5c2d46df616be3ae638c569ef25d5c76e243094abf9e6a31"
+  },
+  "id": "5t7IyW6ug3HGafbI",
+  "tags": []
+}
